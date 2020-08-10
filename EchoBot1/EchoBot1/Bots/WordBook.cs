@@ -1,10 +1,12 @@
-﻿using Microsoft.Bot.Builder;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EchoBot1.Bots
@@ -12,6 +14,22 @@ namespace EchoBot1.Bots
     public static class WordBooks
     {
         public static List<WordBook> wordbooks = new List<WordBook>();
+
+        public static WordBook getYourBook(ChannelAccount user)
+        {
+            foreach(WordBook wb in wordbooks)
+            {
+                if (user.ToString().Equals(wb.user.ToString()))
+                {
+                    return wb;
+                }
+            }
+            //存在しないなら新しく作成
+            WordBook newWb = new WordBook(user);
+            wordbooks.Add(newWb);
+            Debug.WriteLine("new book");
+            return newWb;
+        }
     }
 
 
@@ -26,20 +44,15 @@ namespace EchoBot1.Bots
             this.user = user;
         }
 
-        public async Task UpdateContext( ITurnContext<IMessageActivity>　turnContext)//wordbookがメッセージで呼ばれた
+
+        public async Task addWordFromPic(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            var message = turnContext.Activity.RemoveRecipientMention();
-            if (message.Contains("wordpic"))//画像から読み込むコマンド
-            {
-                addWordFromPic(turnContext).Wait();
-            }
-        }
-        public async Task addWordFromPic(ITurnContext<IMessageActivity> turnContext)
-        {
-            List<String> urls = await getPictureUrls(turnContext);
+            UpdateContextToken(turnContext, cancellationToken);//とりあえずcontextとtokenをアップデートする
+            List<String> urls = await getPictureUrls();
+            reply("urls").Wait();
             if (urls.Count() == 0)
             {
-                reply(turnContext,"画像が読み込めないよ！ごめんなさいm(__)m").Wait();
+                reply("画像が読み込めないよ！ごめんなさいm(__)m").Wait();
                 return;
             }
             else
@@ -55,7 +68,7 @@ namespace EchoBot1.Bots
                 }
                 if(engs.Count == 0)
                 {
-                    reply(turnContext, "画像から文字を読み取れなかった！勉強不足(´；ω；`)ｳｩｩ").Wait();
+                    reply("画像から文字を読み取れなかった！勉強不足(´；ω；`)ｳｩｩ").Wait();
                     return;
                 }
                 else
@@ -77,11 +90,11 @@ namespace EchoBot1.Bots
                     }
                     if (replyStr == "")
                     {
-                        reply(turnContext, "画像から文字を読み取れなかった！ごめんなさい！").Wait();
+                        reply("画像から文字を読み取れなかった！ごめんなさい！").Wait();
                     }
                     else
                     {
-                        reply(turnContext, "検出した単語" + replyStr).Wait();
+                        reply("検出した単語" + replyStr).Wait();
                     }
                 }
             }

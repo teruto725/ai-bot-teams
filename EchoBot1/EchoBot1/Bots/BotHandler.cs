@@ -6,59 +6,48 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Teams;
 using Microsoft.Bot.Schema;
-
+using Microsoft.Bot.Schema.Teams;
+using Newtonsoft.Json.Linq;
 /// <summary>
-/// エラーたぶんapi投げている部分かな？
+/// teams上で画像投げた時にエラー出るところから
 /// </summary>
+/// 
+
 namespace EchoBot1.Bots
 {
-    public class BotHandler : ActivityHandler
-    {
 
+    public class BotHandler: ActivityHandler//このクラスイベントが起こるたびに呼び出されてるので注意
+    {
         public BotHandler()
         {
         }
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
+            
             Debug.WriteLine(WordBooks.wordbooks.Count());
             var message = turnContext.Activity.RemoveRecipientMention();//message that mention deleted
+            ChannelAccount user = turnContext.Activity.From;//メッセージを送ってきたuser
             Debug.WriteLine(turnContext.Activity.From);
-            if (message == null)
+
+            if (message == null || message.Contains("word"))
             {
-                foreach (WordBook wb in WordBooks.wordbooks)
-                {
-                    if (wb.user.ToString() == turnContext.Activity.From.ToString())
-                    {
-                        wb.addWordFromPic(turnContext).Wait();
-                        Debug.WriteLine("ok");
-                        break;
-                    }
-                }
-            }
-            else if (message.Contains("word"))
-            {
-                foreach (WordBook wb in WordBooks.wordbooks)
-                {
-                    if (wb.user.Equals(turnContext.Activity.From))
-                    {
-                        wb.UpdateContext(turnContext).Wait();
-                    }
-                }
+                WordBook yourWb = WordBooks.getYourBook(user);//userのwordbook
+                yourWb.addWordFromPic(turnContext, cancellationToken).Wait();             
             }
 
             else if (message.Contains("echo"))//echobot
             {
-                await turnContext.SendActivityAsync(MessageFactory.Text(message, message), cancellationToken);
+                await turnContext.SendActivityAsync(MessageFactory.Text(message, message),cancellationToken);
             }
-
         }
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
@@ -68,13 +57,10 @@ namespace EchoBot1.Bots
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
                     var m = "ようこそ" + member + "さん！";
-                    WordBooks.wordbooks.Add(new WordBook(member));
-                    Debug.WriteLine(WordBooks.wordbooks.Count());
                     await turnContext.SendActivityAsync(MessageFactory.Text(m,m), cancellationToken);
                 }
             }
         }
 
-        
     }
 }
