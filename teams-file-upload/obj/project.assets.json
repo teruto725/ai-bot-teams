@@ -6435,11 +6435,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\井原輝人\\Desktop\\56.teams-file-upload\\TeamsFileUpload.csproj",
+      "projectUniqueName": "C:\\Users\\井原輝人\\Desktop\\undergoing\\ai-bot-teams\\teams-file-upload\\TeamsFileUpload.csproj",
       "projectName": "TeamsFileUpload",
-      "projectPath": "C:\\Users\\井原輝人\\Desktop\\56.teams-file-upload\\TeamsFileUpload.csproj",
+      "projectPath": "C:\\Users\\井原輝人\\Desktop\\undergoing\\ai-bot-teams\\teams-file-upload\\TeamsFileUpload.csproj",
       "packagesPath": "C:\\Users\\井原輝人\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\井原輝人\\Desktop\\56.teams-file-upload\\obj\\",
+      "outputPath": "C:\\Users\\井原輝人\\Desktop\\undergoing\\ai-bot-teams\\teams-file-upload\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\井原輝人\\AppData\\Roaming\\NuGet\\NuGet.Config",
